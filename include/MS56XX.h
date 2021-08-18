@@ -28,8 +28,8 @@
 
 class MS56XX{
     private:
-        int time, prev_time, dt;
-        int refresh_rate = 0;
+        int prev_time, dt;
+        uint16_t refresh_rate = 0;
 
         bool d1_polled, d2_polled;
         bool d1_read, d2_read;
@@ -51,10 +51,12 @@ class MS56XX{
         uint8_t d1_polling_address;
         uint8_t d2_polling_address;
 
+        uint8_t commandBaro(uint8_t reg);
+        uint8_t requestFromBaro(uint8_t reg, uint8_t count);
+
         void getCoefficients();
         void calculateTemperature();
         void calculateCompensatedPressure();
-        void getDigitalReads();
     public:
         uint8_t device_address;
         
@@ -69,7 +71,7 @@ class MS56XX{
 
     bool begin();
     void configBaro(uint8_t d1_anAddress, uint8_t d2_anAddress);
-    void doBaro();
+    void doBaro(bool doAltitude);
 };
 
 #endif

@@ -2,29 +2,28 @@
 #include <Wire.h>
 #include "MS56XX.h"
 
-#define Serial SerialUSB
+//#define Serial SerialUSB //Tested on ATSAMD21 Arduino Zero environment
 #define BAUD_RATE 115200
 
-MS56XX ms_baro(MS56XX_ADDR_HIGH, MS5607);
+MS56XX MSXX(MS56XX_ADDR_HIGH, MS5607); //Barometer object, change the address depending if your CSB pin is pulled high or low, change MS5607/11 to your desired sensor
 
 void setup(){
   Serial.begin(BAUD_RATE);
-  while(!ms_baro.begin()){
+
+  while(!MSXX.begin()){ //Check if baro has initialized correctly
     Serial.println("BARO-FAIL");
     delay(1000);
   }
-  ms_baro.configBaro(BARO_PRESS_D1_OSR_4096, BARO_TEMP_D2_OSR_4096);
+
+  MSXX.configBaro(BARO_PRESS_D1_OSR_4096, BARO_TEMP_D2_OSR_4096); //Configure oversampling rate for pressure and temperature respectively, default is 512 for both
 }
 
 void loop(){
-  int prevMillis = millis();
-  ms_baro.doBaro();
+  MSXX.doBaro(true); //Calculate pressure and temperature, boolean for altitude estimation from sea level
 
-  Serial.print(ms_baro.pressure);
+  Serial.print(MSXX.pressure); //Pascals
   Serial.print(", ");
-  Serial.print(ms_baro.temperature);
+  Serial.print(MSXX.temperature); //Degrees centigrade
   Serial.print(", ");
-  Serial.print(ms_baro.altitude);
-  Serial.print(", ");
-  Serial.println(millis()-prevMillis);
+  Serial.println(MSXX.altitude); //Meters above sea level
 }

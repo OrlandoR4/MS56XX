@@ -3,8 +3,19 @@
 #include "MS56XX.h"
 
 //MS56XX
-#define commandBaro(data) Wire.beginTransmission(device_address); Wire.write(data); Wire.endTransmission();
-#define requestFromBaro(reg, count) Wire.beginTransmission(device_address); Wire.write(reg); Wire.endTransmission(); Wire.requestFrom(device_address, count);
+
+uint8_t MS56XX::commandBaro(uint8_t data){
+    Wire.beginTransmission(device_address); 
+    Wire.write(data); 
+    return Wire.endTransmission();
+}
+uint8_t MS56XX::requestFromBaro(uint8_t reg, uint8_t count){
+    Wire.beginTransmission(device_address); 
+    Wire.write(reg); 
+    uint8_t err = Wire.endTransmission(); 
+    Wire.requestFrom(device_address, count);
+    return err;
+}
 
 bool MS56XX::begin(){
     Wire.begin();
@@ -12,15 +23,15 @@ bool MS56XX::begin(){
     delay(10);
 
     Wire.beginTransmission(device_address);
-    uint8_t error = Wire.endTransmission();
+    uint8_t error = Wire.endTransmission(); //Check error code of a test transmission
 
     if(error != 0){ return false; }
 
-    commandBaro(0x1E); //Reset
+    commandBaro(0x1E); //Reset the sensor
     
     delay(50);
 
-    uint16_t PROM_BUFFER[8];
+    uint16_t PROM_BUFFER[8]; //Buffer for the PROM memory
 
     for(int i = 0; i < 8; i++){
         requestFromBaro(0xA0 + (i << 1), 2); //Read PROM
@@ -34,7 +45,7 @@ bool MS56XX::begin(){
     c5_temp_ref = PROM_BUFFER[5];
     c6_temp_coef_sens = PROM_BUFFER[6];
 
-    configBaro(BARO_PRESS_D1_OSR_4096, BARO_TEMP_D2_OSR_256);
+    configBaro(BARO_PRESS_D1_OSR_512, BARO_TEMP_D2_OSR_512); //Default configuration
 
     return true;
 }
@@ -44,7 +55,7 @@ void MS56XX::configBaro(uint8_t d1_anAddress, uint8_t d2_anAddress){
     d2_polling_address = d2_anAddress;
 }
 
-void MS56XX::getDigitalReads(){
+void MS56XX::doBaro(bool doAltitude){
     if(!d1_polled){
         prev_time = millis();
         d1_polled = true;
@@ -115,7 +126,9 @@ void MS56XX::getDigitalReads(){
 
     calculateTemperature();
     calculateCompensatedPressure();
-    altitude = 44330.0f * (1.0f - powf( (pressure/100) / 1013.25f, 0.1903f));
+    if(doAltitude){
+        altitude = 44330.0f * (1.0f - powf( (pressure/100) / 1013.25f, 0.1903f));
+    }
 
     d1_polled = false; d2_polled = false;
     d1_read = false; d2_read = false;
@@ -136,8 +149,4 @@ void MS56XX::calculateCompensatedPressure(){
     float comp_pressure = ( (float(d1_pressure) * sens / float(1 << 21)) - offset)/float(1 << 15);
 
     pressure = comp_pressure; // Pascals
-}
-
-void MS56XX::doBaro(){
-    getDigitalReads();
 }
