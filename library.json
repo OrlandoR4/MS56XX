@@ -1,6 +1,6 @@
 {
     "name": "MS56XX",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "description": "Simple but fast non-blocking Arduino i2C library for the MS5607 and MS5611 barometric sensors",
     "keywords": "I2C, barometer, Arduino, barometric",
     "repository":
