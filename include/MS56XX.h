@@ -71,7 +71,7 @@ class MS56XX{
 
     bool begin();
     void configBaro(uint8_t d1_anAddress, uint8_t d2_anAddress);
-    void doBaro(bool doAltitude);
+    bool doBaro(bool doAltitude);
 };
 
 #endif

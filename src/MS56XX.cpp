@@ -55,7 +55,7 @@ void MS56XX::configBaro(uint8_t d1_anAddress, uint8_t d2_anAddress){
     d2_polling_address = d2_anAddress;
 }
 
-void MS56XX::doBaro(bool doAltitude){
+bool MS56XX::doBaro(bool doAltitude){ //RETURNS TRUE IF NEW DATA IS CALCULATED
     if(!d1_polled){
         prev_time = millis();
         d1_polled = true;
@@ -87,7 +87,7 @@ void MS56XX::doBaro(bool doAltitude){
 
         d1_read = true;
     }else if(!d1_read){
-        return;
+        return false;
     }
     
     if(!d2_polled){
@@ -121,7 +121,7 @@ void MS56XX::doBaro(bool doAltitude){
 
         d2_read = true;
     }else if(!d2_read){
-        return;
+        return false;
     }
 
     calculateTemperature();
@@ -132,6 +132,8 @@ void MS56XX::doBaro(bool doAltitude){
 
     d1_polled = false; d2_polled = false;
     d1_read = false; d2_read = false;
+
+    return true;
 }
 
 void MS56XX::calculateTemperature(){

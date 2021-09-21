@@ -19,8 +19,11 @@ void setup(){
 }
 
 void loop(){
-  MSXX.doBaro(true); //Calculate pressure and temperature, boolean for altitude estimation from sea level
-
+  //RETURNS TRUE IF NEW DATA IS CALCULATED
+  bool dataready = MSXX.doBaro(true); //Calculate pressure and temperature, boolean for altitude estimation from sea level
+  
+  Serial.print(uint8_t(dataready)); //Is data fresh?
+  Serial.print(", ");
   Serial.print(MSXX.pressure); //Pascals
   Serial.print(", ");
   Serial.print(MSXX.temperature); //Degrees centigrade
